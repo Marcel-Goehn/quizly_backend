@@ -58,7 +58,7 @@ class LoginView(TokenObtainPairView):
             user = User.objects.get(username=request.data["username"])
         except User.DoesNotExist:
             return Response("User not found.")
-        
+
         response.data = {
             "detail": "Login successfully!",
             "user": {
@@ -67,4 +67,16 @@ class LoginView(TokenObtainPairView):
                 "email": user.email
             }
         }
+        return response
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response(
+            {
+                "detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."
+            }
+        )
+        response.delete_cookie(key="access_token")
+        response.delete_cookie(key="refresh_token")
         return response

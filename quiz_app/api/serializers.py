@@ -29,6 +29,20 @@ class QuestionSerializer(serializers.ModelSerializer):
                   "created_at", "updated_at"]
         read_only_fields = ["id", "created_at"]
 
+    def validate_question_options(self, value):
+        if len(value) != 4:
+            raise serializers.ValidationError(
+                "Each question needs to have exactly 4 answer options.")
+        return value
+
+    def validate(self, attrs):
+        for option in attrs["question_options"]:
+            if attrs["answer"] == option:
+                return attrs
+        raise serializers.ValidationError(
+            {"error": "The answer is nowhere to be found in the options"}
+        )
+
 
 class CreateQuizSerializer(serializers.ModelSerializer):
 
@@ -37,5 +51,31 @@ class CreateQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
         fields = ["id", "title", "description", "created_at",
-                  "video_url", "questions"]
-        read_only_fields = ["id", "created_at"]
+                  "updated_at", "video_url", "questions"]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_description(self, value):
+        if len(value) > 150:
+            raise serializers.ValidationError(
+                "The maximum character length of the description is set to a maximum of 150.")
+        return value
+
+    def validate_questions(self, value):
+        if len(value) != 10:
+            raise serializers.ValidationError(
+                "A quiz should always consist of 10 Questions.")
+        return value
+
+    def create(self, validated_data):
+        quiz_title = validated_data.get("title")
+        quiz_description = validated_data.get("description")
+        quiz_video_url = validated_data.get("video_url")
+        quiz = Quiz.objects.create(title=quiz_title,
+                                   description=quiz_description,
+                                   video_url=quiz_video_url)
+        for question in validated_data.get("questions"):
+            Question.objects.create(quiz=quiz, question_title=question.get("question_title"),
+                                    question_options=question.get(
+                                        "question_options"),
+                                    answer=question.get("answer"))
+        return quiz

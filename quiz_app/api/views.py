@@ -1,6 +1,9 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from .serializers import YouTubeURLSerializer, CreateQuizSerializer
+from rest_framework.permissions import IsAuthenticated
+from .serializers import YouTubeURLSerializer, CreateQuizSerializer, ListRetrieveUpdateQuizSerializer
+from .permissions import IsOwner
 import os
 import yt_dlp
 import whisper
@@ -8,11 +11,12 @@ import json
 from google import genai
 from dotenv import load_dotenv
 from rest_framework import status
+from quiz_app.models import Quiz
 
 load_dotenv()
 
 
-class QuizView(APIView):
+class QuizCreateView(APIView):
     def post(self, req):
         url_serializer = YouTubeURLSerializer(data=req.data)
         if url_serializer.is_valid(raise_exception=True):
@@ -29,7 +33,7 @@ class QuizView(APIView):
         }
         quiz_serializer = CreateQuizSerializer(data=quiz_information_dict)
         if quiz_serializer.is_valid(raise_exception=True):
-            quiz_serializer.save()
+            quiz_serializer.save(user=req.user)
             return Response(quiz_serializer.data, status=status.HTTP_201_CREATED)
         return Response(quiz_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -78,3 +82,16 @@ class QuizView(APIView):
         )
         cleaned_response = json.loads(response.text)
         return cleaned_response
+    
+
+class QuizListView(ListAPIView):
+    serializer_class = ListRetrieveUpdateQuizSerializer
+
+    def get_queryset(self):
+        return Quiz.objects.filter(user=self.request.user)
+    
+
+class QuizRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+    queryset = Quiz.objects.all()
+    serializer_class = ListRetrieveUpdateQuizSerializer

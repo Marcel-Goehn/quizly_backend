@@ -22,7 +22,7 @@ class YouTubeURLSerializer(serializers.Serializer):
         return id.group(1)
 
 
-class QuestionSerializer(serializers.ModelSerializer):
+class CreateQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ["id", "question_title", "question_options", "answer",
@@ -46,7 +46,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 class CreateQuizSerializer(serializers.ModelSerializer):
 
-    questions = QuestionSerializer(many=True)
+    questions = CreateQuestionSerializer(many=True)
 
     class Meta:
         model = Quiz
@@ -67,10 +67,12 @@ class CreateQuizSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        user = validated_data.get("user")
         quiz_title = validated_data.get("title")
         quiz_description = validated_data.get("description")
         quiz_video_url = validated_data.get("video_url")
-        quiz = Quiz.objects.create(title=quiz_title,
+        quiz = Quiz.objects.create(user=user,
+                                   title=quiz_title,
                                    description=quiz_description,
                                    video_url=quiz_video_url)
         for question in validated_data.get("questions"):
@@ -79,3 +81,21 @@ class CreateQuizSerializer(serializers.ModelSerializer):
                                         "question_options"),
                                     answer=question.get("answer"))
         return quiz
+    
+
+class ListRetrieveQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["id", "question_title", "question_options", "answer"]
+        read_only_fields = ["id", "question_title", "question_options", "answer"]
+    
+
+class ListRetrieveUpdateQuizSerializer(serializers.ModelSerializer):
+
+    questions = ListRetrieveQuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Quiz
+        fields = ["id", "title", "description", "created_at", "updated_at",
+                  "video_url", "questions"]
+        read_only_fields = ["id", "created_at", "updated_at", "video_url"]

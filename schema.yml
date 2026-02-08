@@ -1,0 +1,480 @@
+openapi: 3.0.3
+info:
+  title: Quizly
+  version: 1.0.0
+  description: Generate Quizzes based on YouTube links. It extracts the audio, converts
+    it into text and lastly generates questions and answers based on the Gemini API
+paths:
+  /api/createQuiz/:
+    post:
+      operationId: createQuiz_create
+      description: 'Authentication required. Creates a Quiz in multiple steps. Step
+        1: Extracts audio from YouTube video. Step 2: Transcribes the audio into text.
+        Step 3: Takes the generated text and inputs it into Gemini API to create a
+        Quiz.'
+      tags:
+      - createQuiz
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YouTubeURL'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/YouTubeURL'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/YouTubeURL'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateQuiz'
+          description: ''
+  /api/login/:
+    post:
+      operationId: login_create
+      description: Takes a set of user credentials and returns an access and refresh
+        JSON web token pair as HTTP Only Cookies to prove the authentication of those
+        credentials.
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccessResponse'
+          description: ''
+  /api/logout/:
+    post:
+      operationId: logout_create
+      description: Authentication Required. Logs a user out and deletes acces + refresh
+        token.
+      tags:
+      - logout
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+          description: ''
+  /api/quizzes/:
+    get:
+      operationId: quizzes_list
+      description: Authentication required. Returns a list of all quizzes that the
+        authenticated users has created.
+      tags:
+      - quizzes
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          description: ''
+  /api/quizzes/{id}/:
+    get:
+      operationId: quizzes_retrieve
+      description: Authentication required. Returns a specific quiz. User has to be
+        the creator.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - quizzes
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          description: ''
+    put:
+      operationId: quizzes_update
+      description: PUT is not supported. Use PATCH instead.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          description: ''
+    patch:
+      operationId: quizzes_partial_update
+      description: Authentication required. User has to be the owner of the specific
+        quiz. title and description can be updated.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedListRetrieveUpdateQuiz'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedListRetrieveUpdateQuiz'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedListRetrieveUpdateQuiz'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRetrieveUpdateQuiz'
+          description: ''
+    delete:
+      operationId: quizzes_destroy
+      description: Authentication required. User has to be the owner of the specific
+        quiz. Deletes it permanently.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - quizzes
+      responses:
+        '204':
+          description: No response body
+  /api/register/:
+    post:
+      operationId: register_create
+      description: Registers a new user.
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Registration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Registration'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSuccessResponse'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: Authentication Required. Takes a refresh type JSON web token and
+        returns an access type JSON web token if the refresh token is valid.
+      tags:
+      - token
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseRefreshToken'
+          description: ''
+components:
+  schemas:
+    CreateQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_title:
+          type: string
+          maxLength: 200
+        question_options: {}
+        answer:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - answer
+      - created_at
+      - id
+      - question_title
+      - updated_at
+    CreateQuiz:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        video_url:
+          type: string
+          format: uri
+          maxLength: 200
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateQuestion'
+      required:
+      - created_at
+      - description
+      - id
+      - questions
+      - title
+      - updated_at
+      - video_url
+    ListRetrieveQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        question_title:
+          type: string
+          readOnly: true
+        question_options:
+          readOnly: true
+        answer:
+          type: string
+          readOnly: true
+      required:
+      - answer
+      - id
+      - question_options
+      - question_title
+    ListRetrieveUpdateQuiz:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        video_url:
+          type: string
+          format: uri
+          readOnly: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListRetrieveQuestion'
+          readOnly: true
+      required:
+      - created_at
+      - description
+      - id
+      - questions
+      - title
+      - updated_at
+      - video_url
+    LoginSuccessResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserInline'
+      required:
+      - detail
+      - user
+    LogoutResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    PatchedListRetrieveUpdateQuiz:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        video_url:
+          type: string
+          format: uri
+          readOnly: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListRetrieveQuestion'
+          readOnly: true
+    Registration:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          maxLength: 128
+        confirmed_password:
+          type: string
+          writeOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+      required:
+      - confirmed_password
+      - email
+      - password
+      - username
+    RegistrationSuccessResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    ResponseRefreshToken:
+      type: object
+      properties:
+        detail:
+          type: string
+        access:
+          type: string
+      required:
+      - access
+      - detail
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - password
+      - refresh
+      - username
+    UserInline:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - id
+      - username
+    YouTubeURL:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+      required:
+      - url

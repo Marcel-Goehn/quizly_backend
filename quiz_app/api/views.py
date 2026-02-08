@@ -12,11 +12,18 @@ from google import genai
 from dotenv import load_dotenv
 from rest_framework import status
 from quiz_app.models import Quiz
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 load_dotenv()
 
 
 class QuizCreateView(APIView):
+
+    @extend_schema(
+        description="Authentication required. Creates a Quiz in multiple steps. Step 1: Extracts audio from YouTube video. Step 2: Transcribes the audio into text. Step 3: Takes the generated text and inputs it into Gemini API to create a Quiz.",
+        request=YouTubeURLSerializer,
+        responses={201: CreateQuizSerializer}
+    )
     def post(self, req):
         url_serializer = YouTubeURLSerializer(data=req.data)
         if url_serializer.is_valid(raise_exception=True):
@@ -82,15 +89,32 @@ class QuizCreateView(APIView):
         )
         cleaned_response = json.loads(response.text)
         return cleaned_response
-    
 
+
+@extend_schema(
+    description="Authentication required. Returns a list of all quizzes that the authenticated users has created."
+)
 class QuizListView(ListAPIView):
     serializer_class = ListRetrieveUpdateQuizSerializer
 
     def get_queryset(self):
         return Quiz.objects.filter(user=self.request.user)
-    
 
+
+@extend_schema_view(
+    get=extend_schema(
+        description="Authentication required. Returns a specific quiz. User has to be the creator."
+    ),
+    put=extend_schema(
+        description="PUT is not supported. Use PATCH instead."
+    ),
+    patch=extend_schema(
+        description="Authentication required. User has to be the owner of the specific quiz. title and description can be updated."
+    ),
+    delete=extend_schema(
+        description="Authentication required. User has to be the owner of the specific quiz. Deletes it permanently."
+    )
+)
 class QuizRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Quiz.objects.all()

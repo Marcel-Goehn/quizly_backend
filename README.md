@@ -1,7 +1,7 @@
 
-# Coderr Backend
+# Quizly Backend
 
-This project provides a backend for a quiz generating application. It creates quizzes from YouTube links. It is vuild with **Django** and the **Django REST Framework**.
+This project provides a backend for a quiz generating application. It creates quizzes from YouTube links. It is build with **Django** and the **Django REST Framework**.
 It provides a RESTful API for managing registration, login, logout, creating quizzes, retrieving quizzes, updating quizzes and deleting quizzes.
 
 

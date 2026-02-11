@@ -59,6 +59,11 @@ class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Overrides the default post() method. After successfully entering the 
+        username and password for login, an access and refresh token will be 
+        set into the response as a cookie. 
+        """
         response = super().post(request, *args, **kwargs)
         refresh = response.data.get("refresh")
         access = response.data.get("access")
@@ -107,6 +112,10 @@ class LoginView(TokenObtainPairView):
 )
 class LogoutView(APIView):
     def post(self, request):
+        """
+        Deletes the access and refresh token from the response cookie. 
+        User has to re enter his initials if he wants to continue.
+        """
         response = Response(
             {
                 "detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."
@@ -132,6 +141,11 @@ class RefreshView(TokenRefreshView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        If the access token has expired, the user can claim another one.
+        With the help of this view, it makes use of the refresh token. 
+        If it is valid, the view will return a new access token via the response cookie.
+        """
         refresh_token = request.COOKIES.get("refresh_token")
 
         if refresh_token is None:

@@ -22,6 +22,15 @@ class QuizCreateView(APIView):
         responses={201: CreateQuizSerializer}
     )
     def post(self, req):
+        """
+        This method does multiple things:
+            -1. Validates and extracts the YouTube video ID
+            -2. Removes old audio files and calls the download_audio method to retrieve a new audio file
+            -3. Calls the transcribe method to retrieve the transcript.
+            -4. Call the create_quiz() method to genereate the quiz.
+            -5. After creating the quiz, it calls the serializer for validation.
+            -6. If valid, it saves the quiz to the database and returns the quiz data. 
+        """
         url_serializer = YouTubeURLSerializer(data=req.data)
         if url_serializer.is_valid(raise_exception=True):
             data = url_serializer.validated_data
@@ -49,6 +58,9 @@ class QuizListView(ListAPIView):
     serializer_class = ListRetrieveUpdateQuizSerializer
 
     def get_queryset(self):
+        """
+        Return only quizzes that belong to the authenticated user.
+        """
         return Quiz.objects.filter(user=self.request.user)
 
 

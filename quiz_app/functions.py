@@ -5,6 +5,10 @@ from google import genai
 
 
 def download_audio(id):
+    """
+    Downloads an audio file from a specific youtube video, wich is provided with the url as 
+    the id parameter.
+    """
     url = f"https://www.youtube.com/watch?v={id}"
     tmp_filename = "quiz_app/audio/audio.aac"
     ydl_opts = {
@@ -18,12 +22,20 @@ def download_audio(id):
 
 
 def transcribe_audio():
+    """
+    Transcribes the generated audio from the YouTube video
+    into text format.
+    """
     model = whisper.load_model("turbo")
     result = model.transcribe("quiz_app/audio/audio.aac")
     return result
 
 
 def create_quiz(transcript):
+    """
+    It uses the transcript and the prompt to generate a quiz with the help of the 
+    GeminiAPI.
+    """
     client = genai.Client()
     response = client.models.generate_content(
         model="gemini-3-flash-preview",

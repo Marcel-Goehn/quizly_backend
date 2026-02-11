@@ -3,6 +3,11 @@ from rest_framework_simplejwt.exceptions import AuthenticationFailed, InvalidTok
 
 
 class CookieJWTAuthentication(JWTAuthentication):
+    """
+    Custom authenticate method. This has to be done, because in this project
+    are http only cookies used to authenticate. The standard drf JWT authentication class 
+    only works with request headers, not cookies.
+    """
     def authenticate(self, request):
         token = request.COOKIES.get("access_token")
         if not token:

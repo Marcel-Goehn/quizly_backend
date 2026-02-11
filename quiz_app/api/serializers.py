@@ -106,14 +106,15 @@ class CreateQuizSerializer(serializers.ModelSerializer):
                                         "question_options"),
                                     answer=question.get("answer"))
         return quiz
-    
+
 
 class ListRetrieveQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ["id", "question_title", "question_options", "answer"]
-        read_only_fields = ["id", "question_title", "question_options", "answer"]
-    
+        read_only_fields = ["id", "question_title",
+                            "question_options", "answer"]
+
 
 class ListRetrieveUpdateQuizSerializer(serializers.ModelSerializer):
 
@@ -124,3 +125,15 @@ class ListRetrieveUpdateQuizSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "description", "created_at", "updated_at",
                   "video_url", "questions"]
         read_only_fields = ["id", "created_at", "updated_at", "video_url"]
+
+    def validate(self, attrs):
+        """
+        Check if fields other than title and description are tried to be updated.
+        If the title or description are not provided the attrs dict will be empty, so a length of 0
+        will be returned
+        """
+        if len(attrs) == 0:
+            raise serializers.ValidationError({
+                "error": "Only quiz title and description can be updated via PATCH."
+            })
+        return attrs

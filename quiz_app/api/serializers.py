@@ -1,7 +1,5 @@
 import re
-
 from rest_framework import serializers
-
 from quiz_app.models import Quiz, Question
 
 

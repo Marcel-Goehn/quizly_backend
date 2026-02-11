@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from quiz_app.models import Quiz
 
 class IsOwner(BasePermission):
     def has_permission(self, request, view):

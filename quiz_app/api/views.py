@@ -34,7 +34,11 @@ class QuizCreateView(APIView):
         url_serializer = YouTubeURLSerializer(data=req.data)
         if url_serializer.is_valid(raise_exception=True):
             data = url_serializer.validated_data
-        os.remove("quiz_app/audio/audio.aac")
+        if os.path.isdir("quiz_app/audio"):
+            if os.path.isfile("quiz_app/audio/audio.aac"):
+                os.remove("quiz_app/audio/audio.aac")
+        else:
+            os.makedirs("quiz_app/audio")
         download_audio(data.get("url"))
         transcription_result = transcribe_audio()
         generated_quiz = create_quiz(transcription_result)

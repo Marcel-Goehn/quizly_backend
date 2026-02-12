@@ -27,7 +27,7 @@ def transcribe_audio():
     into text format.
     """
     model = whisper.load_model("turbo")
-    result = model.transcribe("quiz_app/audio/audio.aac")
+    result = model.transcribe("quiz_app/audio/audio.aac", fp16=False)
     return result
 
 

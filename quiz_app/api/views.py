@@ -39,9 +39,21 @@ class QuizCreateView(APIView):
                 os.remove("quiz_app/audio/audio.aac")
         else:
             os.makedirs("quiz_app/audio")
-        download_audio(data.get("url"))
-        transcription_result = transcribe_audio()
-        generated_quiz = create_quiz(transcription_result)
+        try:
+            download_audio(data.get("url"))
+        except: 
+            return Response("Failed to download audio. Check URL.",
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            transcription_result = transcribe_audio()
+        except:
+            return Response("Failed to transcribe audio. Please try again.",
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            generated_quiz = create_quiz(transcription_result)
+        except:
+            return Response("Failed to generate quiz. Please try again.",
+                            status=status.HTTP_400_BAD_REQUEST)
         quiz_information_dict = {
             "title": generated_quiz.get("title"),
             "description": generated_quiz.get("description"),

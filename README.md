@@ -27,10 +27,7 @@ To view all possible endpoints go to this link after the server runs: api/schema
 
 -A global version of ffmpeg has to be installed. It also needs to be inserted into the system environment variables (User) PATH.
 
--An API key for the usage of the Gemini AI. Insert the API key in a .env file with the key named: GEMINI_API_KEY 
-
 -Python version 3.13.7 is needed for this project to successfully install all dependencies via pip
-
 
 ## Installation
 
@@ -50,6 +47,12 @@ venv\Scripts\activate   # Windows
 Install all dependencies:
 ```bash
 pip install -r requirements.txt
+```
+
+Create .env file and insert your secrets:
+```bash
+copy .env.template .env # Windows
+# cp .env.template .env # Mac, Linux
 ```
 
 Create migration plan:

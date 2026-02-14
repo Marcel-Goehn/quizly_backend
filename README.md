@@ -29,6 +29,8 @@ To view all possible endpoints go to this link after the server runs: api/schema
 
 -An API key for the usage of the Gemini AI. Insert the API key in a .env file with the key named: GEMINI_API_KEY 
 
+-Python version 3.13.7 is needed for this project to successfully install all dependencies via pip
+
 
 ## Installation
 

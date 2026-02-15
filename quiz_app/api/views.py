@@ -9,13 +9,15 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from .serializers import YouTubeURLSerializer, CreateQuizSerializer, ListRetrieveUpdateQuizSerializer
 from .permissions import IsOwner
 from quiz_app.models import Quiz
-from quiz_app.functions import download_audio, transcribe_audio, create_quiz
+from quiz_app.utils import download_audio, transcribe_audio, create_quiz
 
 load_dotenv()
 
 
 class QuizCreateView(APIView):
-
+    """
+    This view is used for creating new quizzes.
+    """
     @extend_schema(
         description="Authentication required. Creates a Quiz in multiple steps. Step 1: Extracts audio from YouTube video. Step 2: Transcribes the audio into text. Step 3: Takes the generated text and inputs it into Gemini API to create a Quiz.",
         request=YouTubeURLSerializer,
@@ -71,12 +73,12 @@ class QuizCreateView(APIView):
     description="Authentication required. Returns a list of all quizzes that the authenticated users has created."
 )
 class QuizListView(ListAPIView):
+    """
+    Returns a list of all quizzes that belong to the authenticated user.
+    """
     serializer_class = ListRetrieveUpdateQuizSerializer
 
     def get_queryset(self):
-        """
-        Return only quizzes that belong to the authenticated user.
-        """
         return Quiz.objects.filter(user=self.request.user)
 
 
@@ -95,6 +97,10 @@ class QuizListView(ListAPIView):
     )
 )
 class QuizRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    This view is used for retrieving, updating and deleting quizzes based 
+    on their id.
+    """
     permission_classes = [IsAuthenticated, IsOwner]
     queryset = Quiz.objects.all()
     serializer_class = ListRetrieveUpdateQuizSerializer

@@ -22,9 +22,15 @@ from .serializers import RegistrationSerializer
     description="Registers a new user."
 )
 class RegistrationView(APIView):
+    """
+    View for registering a new user
+    """
     permission_classes = [AllowAny]
 
     def post(self, req):
+        """
+        Creates a new user and saves it to the database.
+        """
         serializer = RegistrationSerializer(data=req.data)
         if serializer.is_valid():
             serializer.save()
@@ -56,6 +62,11 @@ class RegistrationView(APIView):
     )}
 )
 class LoginView(TokenObtainPairView):
+    """
+    This view is for logging in an already registered user.
+    If the response is successful, it also return HTTP only cookies with 
+    authentication credentials.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -111,6 +122,9 @@ class LoginView(TokenObtainPairView):
     )}
 )
 class LogoutView(APIView):
+    """
+    This view is for logging a user out.
+    """
     def post(self, request):
         """
         Deletes the access and refresh token from the response cookie. 
@@ -138,6 +152,10 @@ class LogoutView(APIView):
     description="Authentication Required. Takes a refresh type JSON web token and returns an access type JSON web token if the refresh token is valid."
 )
 class RefreshView(TokenRefreshView):
+    """
+    With the help of this view are users able, to refresh their access token without
+    the need to login again.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):

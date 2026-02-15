@@ -1,6 +1,9 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 class IsOwner(BasePermission):
+    """
+    Checks if the authenticated user is also the owner of the quiz.
+    """
     def has_permission(self, request, view):
         """
         Allows GET, PATCH and DELETE methods.

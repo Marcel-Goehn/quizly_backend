@@ -11,6 +11,9 @@ class YouTubeURLSerializer(serializers.Serializer):
     url = serializers.URLField(allow_blank=False, required=True)
 
     def validate_url(self, value):
+        """
+        Regex extracts the ID for the specific YouTube video.
+        """
         regex = re.compile(
             r'(?:https?://)?(?:www\.)?'
             r'(?:youtube\.com/(?:watch\?v=|shorts/)|youtu\.be/)'
@@ -58,6 +61,9 @@ class CreateQuestionSerializer(serializers.ModelSerializer):
 
 
 class CreateQuizSerializer(serializers.ModelSerializer):
+    """
+    Serializes the incoming values for creating a new quiz.
+    """
 
     questions = CreateQuestionSerializer(many=True)
 
@@ -109,6 +115,9 @@ class CreateQuizSerializer(serializers.ModelSerializer):
 
 
 class ListRetrieveQuestionSerializer(serializers.ModelSerializer):
+    """
+    Serializes the response visualization for listing alls Questions of a quiz.
+    """
     class Meta:
         model = Question
         fields = ["id", "question_title", "question_options", "answer"]
@@ -117,6 +126,10 @@ class ListRetrieveQuestionSerializer(serializers.ModelSerializer):
 
 
 class ListRetrieveUpdateQuizSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the reponse of list or single Quiz view.
+    Also serializes the PATCH method for updating the title or description.
+    """
 
     questions = ListRetrieveQuestionSerializer(many=True, read_only=True)
 

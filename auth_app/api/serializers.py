@@ -3,7 +3,9 @@ from rest_framework import serializers
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-
+    """
+    Serializer class for the registration view. 
+    """
     confirmed_password = serializers.CharField(write_only=True)
 
     class Meta:
